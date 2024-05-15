@@ -34,3 +34,5 @@
 # build file
 /build
 /bin
+/*/build
+/*/bincmake

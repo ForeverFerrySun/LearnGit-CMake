@@ -41,5 +41,6 @@
         "iosfwd": "cpp",
         "iostream": "cpp",
         "limits": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "F:/GitHub/Git/Learn/LearnGit-CMake/CMakeProject-2"
 }
