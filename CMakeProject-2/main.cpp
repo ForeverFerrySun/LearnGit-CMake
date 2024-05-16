@@ -2,7 +2,7 @@
  * @FilePath     : \LearnGit-CMake\CMakeProject-2\main.cpp
  * @Date         : 2024-05-15 20:23:15
  * @author       : foreverferrysun
- * @LastEditTime : 2024-05-16 00:45:56
+ * @LastEditTime : 2024-05-16 09:31:50
  * @LastEditors  : foreverferrysun
  * @FileDescription:
  */
@@ -20,12 +20,12 @@ int main()
 
     int arr[14] = {0, 5, 7, 9, 6, 3, 4, 5, 2, 8, 6, 9, 2, 1};
 
-    // BucketSort bucketsort;
-    // bucketsort.BucketSort_(14, arr);
-    // cout << "BucketSort:" << endl;
-    // for (int i = 0; i < 14; i++)
-    //     cout << arr[i] << "  ";
-    // cout << endl;
+    BucketSort bucketsort;
+    bucketsort.BucketSort_(14, arr);
+    cout << "BucketSort:" << endl;
+    for (int i = 0; i < 14; i++)
+        cout << arr[i] << "  ";
+    cout << endl;
 
     CountSort countsort;
     countsort.CountSort_(vecRaw, vecObj);
@@ -35,7 +35,7 @@ int main()
     cout << endl;
 
     QuickSort quicksort;
-    quicksort.QuickSort_(vecRaw, 0, vecRaw.size());
+    quicksort.QuickSort_(vecRaw, 0, static_cast<int>(vecRaw.size()));
     cout << "QuickSort:" << endl;
     for (int i = 0; i < vecRaw.size(); ++i)
         cout << vecRaw[i] << "  ";
