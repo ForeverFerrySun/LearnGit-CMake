@@ -6,6 +6,7 @@ project(ThirdProject
     HOMEPAGE_URL "https://github.com/ForeverFerrySun/LearnGit-CMake"
     LANGUAGES CXX
 )
+
 # C++版本
 set(CMAKE_CXX_STANDARD 17)
 
