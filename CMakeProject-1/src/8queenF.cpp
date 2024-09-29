@@ -1,12 +1,12 @@
 /*
- * @FilePath     : \LearnGit-CMake\8queenF.cpp
+ * @FilePath     : \LearnGit-CMake\CMakeProject-1\src\8queenF.cpp
  * @Date         : 2024-05-12 19:00:48
  * @author       : foreverferrysun
- * @LastEditTime : 2024-05-12 19:11:01
+ * @LastEditTime : 2024-09-29 18:11:03
  * @LastEditors  : foreverferrysun
  * @FileDescription:  
  */
-#include "8queenF.h"
+#include "../include/8queenF.h"
 using namespace alg;
 
 void Queen8::solve() {
