@@ -33,6 +33,11 @@
 
 # build file
 /build
-/bin
 /*/build
-/*/bincmake
+/*/*/build
+/bin
+/*/bin
+/*/*/bin
+/lib
+/*/lib
+/*/*/lib
