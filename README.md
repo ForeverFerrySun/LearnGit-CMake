@@ -138,10 +138,6 @@ endif()
 add_executable(MyApp main.cpp app.cpp)
 ```
 
-
-
-
-
 ### CMake 创建库
 
 在 CMake 中，通过 `add_library()` 命令可以创建静态库、动态库和模块库。这是用于将源文件编译为库，并在项目中进行组织和管理的一种方式。库可以在同一项目内被多个目标使用，也可以为不同的项目提供共享功能。以下是关于如何通过 CMake 创建库以及如何将其连接到可执行文件的优化整理。
@@ -168,6 +164,7 @@ add_library(<name> [STATIC | SHARED | MODULE]
 为了更好地组织代码和库，我们可以将不同的功能模块放在单独的子目录中，每个子目录包含自己的 `CMakeLists.txt`。通过顶层 `CMakeLists.txt` 使用 `add_subdirectory()` 命令引入这些子目录。
 
 项目目录结构示例：
+
 ```
 /MyProject
     /src
@@ -227,6 +224,7 @@ target_include_directories(common
 ```
 
 `PUBLIC`、`PRIVATE` 和 `INTERFACE` 关键字的含义与 `target_link_libraries()` 类似：
+
 - **`PRIVATE`**: 头文件仅对当前目标可见。
 - **`PUBLIC`**: 头文件对当前目标和所有依赖该目标的目标都可见。
 - **`INTERFACE`**: 头文件仅对依赖该目标的目标可见。
@@ -483,51 +481,69 @@ target_link_libraries(MyApp PRIVATE pthread)
 ```
 
 #### 总结
+
 - `target_link_libraries()` 用于将外部或自定义库链接到目标（如可执行文件或库）。
 - **PRIVATE**、**PUBLIC** 和 **INTERFACE** 关键字控制库的可见性和依赖传播。
 - 系统库、第三方库和自定义库均可使用该命令进行链接。
 - 使用 `find_package()` 结合 `target_link_libraries()` 是处理第三方库的常见模式。
 
-
-
-
-
 ### CMake 输出路径配置及安装设置
 
 #### 1. **设置可执行文件输出路径**
+
 用于设置所有可执行文件的输出路径：
+
 ```cmake
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../bin)
 ```
 
 #### 2. **设置静态库输出路径**
+
 用于设置静态库的输出路径：
+
 ```cmake
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
 ```
 
 #### 3. **设置动态库输出路径**
+
 为动态库目标设置输出路径，使用 `SET_TARGET_PROPERTIES` 来对指定目标动态库单独设置：
+
 ```cmake
 set_target_properties(dllname PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
+
+# 设定动态链接库的存储路径
+set_target_properties(${PROJECT_NAME} PROPERTIES 
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib
+    # static静态库
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib
+    )
+
 ```
 
 #### 4. **设置不同版本库文件的后缀名**
+
 设置 Debug 和 Release 版本下生成的库文件后缀名：
+
 ```cmake
 set(CMAKE_DEBUG_POSTFIX "_d")    # Debug 库文件后缀
 set(CMAKE_RELEASE_POSTFIX "_r")  # Release 库文件后缀
 ```
 
 #### 5. **设置不同版本可执行文件的后缀名**
+
 为特定目标的可执行文件在不同版本下设置后缀名：
+
 ```cmake
 set_target_properties(${TARGET_NAME} PROPERTIES DEBUG_POSTFIX "_d")
 set_target_properties(${TARGET_NAME} PROPERTIES RELEASE_POSTFIX "_r")
 ```
 
 #### 6. **设置安装目录 `CMAKE_INSTALL_PREFIX`**
+
 配置项目的安装路径，指定不同类型的文件（如动态库、静态库、可执行文件、头文件等）的安装目录：
+
 ```cmake
 set(CMAKE_INSTALL_PREFIX <你要安装的路径>)  # 安装根路径
 
@@ -539,17 +555,21 @@ install(TARGETS MyLib
     PUBLIC_HEADER DESTINATION include  # 头文件安装路径
 )
 ```
+
 - **`LIBRARY`**：动态库的安装路径。
 - **`ARCHIVE`**：静态库的安装路径。
 - **`RUNTIME`**：可执行文件的安装路径。
 - **`PUBLIC_HEADER`**：头文件的安装路径。
 
 #### 7. **默认安装路径说明**
+
 `CMAKE_INSTALL_PREFIX` 的默认值如下：
+
 - **Unix**: `/usr/local`
 - **Windows**: `C:/Program Files/${PROJECT_NAME}`
 
 #### 8. **可选的安装路径配置**
+
 如果不使用默认路径，`DESTINATION` 后的路径可以根据需要自行制定。可以用 `set()` 方法提前设置自定义安装路径：
 
 ```cmake
@@ -571,19 +591,21 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)  # 自定义安装路径
 **不同点**：
 
 1. **全局性 vs. 目标特定**：
+
    - **`CMAKE_RUNTIME_OUTPUT_DIRECTORY`** 是一个**全局变量**，适用于整个项目的所有可执行文件（包括主程序、测试程序等）。它为项目中所有可执行文件设置统一的输出目录。
    - **`EXECUTABLE_OUTPUT_PATH`** 是**目标特定的属性**，仅用于指定某个具体目标（可执行文件）的输出路径。
-
 2. **优先级**：
+
    - **`EXECUTABLE_OUTPUT_PATH`** 的优先级更高。如果同时设置了 `CMAKE_RUNTIME_OUTPUT_DIRECTORY` 和 `EXECUTABLE_OUTPUT_PATH`，则某个特定目标的输出会以 `EXECUTABLE_OUTPUT_PATH` 为准。
-   
 3. **使用方式**：
+
    - **`CMAKE_RUNTIME_OUTPUT_DIRECTORY`**：常用于项目中有多个可执行文件，想统一指定所有可执行文件的输出路径时使用。
-     
+
      ```cmake
      set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
      ```
    - **`EXECUTABLE_OUTPUT_PATH`**：常用于针对单个可执行文件的输出路径需求时使用。
+
      ```cmake
      set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/custom_output")
      ```
@@ -591,7 +613,7 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)  # 自定义安装路径
 - **`CMAKE_RUNTIME_OUTPUT_DIRECTORY`** 影响全局的可执行文件输出路径。
 - **`EXECUTABLE_OUTPUT_PATH`** 影响特定目标的可执行文件输出路径，优先级更高。
 
-### `FILE(GLOB ...)` 
+### `FILE(GLOB ...)`
 
 `FILE(GLOB ...)` 是 CMake 中的一个命令，用于匹配特定路径中的文件模式并生成相应的文件列表。它可以通过指定通配符（如 `*.cpp`, `*.h` 等）来捕获一组文件，并将它们存储在一个变量中。主要用法如下：
 
@@ -665,13 +687,8 @@ install(FILES ${CONFIG_FILES} DESTINATION "/etc/myapp/")
 
 1. **不建议动态查找源文件**：
    尽管 `FILE(GLOB ...)` 看起来可以自动管理源文件，但它在实际项目中可能不是最佳实践。因为 CMake 是在配置阶段执行的，而 `GLOB` 查找文件后不会自动跟踪文件变动（例如添加或删除文件后，可能需要重新生成构建系统）。因此，如果源文件经常变化，最好手动列出文件，或者确保在文件变化时重新运行 CMake 进行更新。
-
 2. **性能问题**：
    如果使用 `GLOB_RECURSE` 来递归查找文件，可能会导致性能问题，特别是在大型项目中，因为它会递归遍历目录树。
-
-
-
-
 
 ### CMake子目录项目管理
 
@@ -681,8 +698,3 @@ install(FILES ${CONFIG_FILES} DESTINATION "/etc/myapp/")
 add_subdirectory(src)
 add_subdirectory(lib)
 ```
-
-
-
-
-
