@@ -1,12 +1,21 @@
-## CMake生成库文件
+# CMake生成库
 
-### CMake的第三方库使用
+#### 注意事项
+
+**window下使用**
+
+```
+# windows系统动态库生成lib文件命令
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+```
+
+
+## search查找库
+
+
+## add_library
 
 主要生成自定义生成库，生成动态库和静态库，没有生成对应的*.cmake连接。
-
-
-
-
 
 #### 注意事项
 
@@ -16,8 +25,6 @@
 #windows系统动态库生成lib文件命令
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 ```
-
-
 
 ### 排序，查找
 
@@ -146,3 +153,9 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)  # 自定义安装路径
 
 - **`CMAKE_RUNTIME_OUTPUT_DIRECTORY`** 影响全局的可执行文件输出路径。
 - **`EXECUTABLE_OUTPUT_PATH`** 影响特定目标的可执行文件输出路径，优先级更高。
+
+### 项目1
+
+#### C++查找(search)
+
+#### C++排序(sort)

@@ -2,117 +2,128 @@
 
 学习使用CMake，这里记录一下
 
-### CMake 基础信息设置
+## 注释
 
-在使用 CMake 构建项目时，初始设置至关重要，它包括项目的最小版本、项目名称、编译选项和可执行文件的生成等。以下是关于 CMake 基础设置的详细说明和优化建议。
+### 注释行
 
-#### 1. **CMake 最小版本**
+CMake 使用 # 进行行注释，可以放在任何位置。
 
-```cmake
-cmake_minimum_required(VERSION <min> [<policy_max>] [FATAL_ERROR])
+### 注释块
+
+CMake 使用 #[[ ]] 形式进行块注释。
+
+例子：
+
+```
+# 这是一个 CMakeLists.txt 文件
+
+#[[ 这是一个 CMakeLists.txt 文件。
+这是一个 CMakeLists.txt 文件
+这是一个 CMakeLists.txt 文件]]
+
 ```
 
-此命令指定 CMake 构建系统的最低版本要求。如果运行的 CMake 版本低于 `<min>` 版本，构建将会终止并提示错误。
+## 添加版本号和配置头文件
 
-- **`VERSION <min>`**: 指定所需的最低版本号。
-- **`FATAL_ERROR`**: 对 CMake 2.6 及以上版本支持，如果版本不满足要求，则停止并报告错误。
+### CMakeLists.txt 为可执行文件和项目提供一个版本号
 
-示例：
-
-```cmake
-cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-```
-
-#### 2. **设置项目名称**
+首先，修改 CMakeLists.txt 文件，使用 project 命令设置项目名称和版本号。
 
 ```cmake
-project(<PROJECT-NAME>
-        [VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
-        [DESCRIPTION <project-description-string>]
-        [HOMEPAGE_URL <url-string>]
-        [LANGUAGES <language-name>...])
+cmake_minimum_required(VERSION 3.15)
+
+# 设置工程名称和版本
+project(Tutorial VERSION 1.0.2)
+
+configure_file(TutorialConfig.h.in TutorialConfig.h)
 ```
 
-- **`PROJECT-NAME`**: 项目名称，设置后可以通过变量 `PROJECT_NAME` 和 `CMAKE_PROJECT_NAME` 访问。
-- **`VERSION`**: 设置项目的版本号（可选）。
-- **`DESCRIPTION`**: 项目的描述（可选）。
-- **`HOMEPAGE_URL`**: 项目主页 URL（可选）。
-- **`LANGUAGES`**: 指定要使用的编程语言（如 `C`、`CXX`）。
-
-示例：
+### 配置头文件将版本号传递给源代码：
 
 ```cmake
-project(MyProject 
-    VERSION 1.0.1 
-    DESCRIPTION "My sample project with C++"
-    HOMEPAGE_URL "https://github.com/user/myproject"
-    LANGUAGES CXX)
+configure_file(TutorialConfig.h.in TutorialConfig.h)
 ```
 
-该项目定义了名称、版本、描述和主页，并使用 C++ 作为编程语言。
+由于 TutorialConfig.h 文件这里被设置为自动写入 build 目录，因此需要将该目录添加到搜索头文件的路径列表中，也可以修改为写到其它目录。
 
-#### 3. **C++ 版本Qt内容设置**
-
-在 CMake 中，可以通过以下选项为项目指定特定的 C++ 版本以及编译器选项：
+将以下行添加到 CMakeLists.txt 文件的末尾：
 
 ```cmake
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+target_include_directories(${PROJECT_NAME} PUBLIC
+                           ${PROJECT_BINARY_DIR}
+                           )
 ```
 
-- **`CMAKE_CXX_STANDARD`**: 设置 C++ 标准版本（如 17、20 等）。
-- **`CMAKE_CXX_STANDARD_REQUIRED`**: 确保所指定的 C++ 标准是强制要求的，如果编译器不支持将会出错。
-- **`CMAKE_CXX_EXTENSIONS`**: 禁用编译器特定的语言扩展，确保使用标准 C++ 语法。
+`PROJECT_BINARY_DIR` 表示当前工程的二进制路径，即编译产物会存放到该路径，此时`PROJECT_BINARY_DIR` 就是 build 所在路径。
 
-此外，对于 Qt 项目，还可以自动处理 Qt 的相关编译器工具：
+### 手动创建 **TutorialConfig.h.in** 文件，包含以下内容：
 
 ```cmake
-set(CMAKE_AUTOUIC ON)  # 自动处理 .ui 文件
-set(CMAKE_AUTOMOC ON)  # 自动处理 MOC
-set(CMAKE_AUTORCC ON)  # 自动处理资源文件 (.qrc)
+// 设置工程的相关信息
+#define Tutorial_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define Tutorial_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define Tutorial_VERSION_PATCH @PROJECT_VERSION_PATCH@
 ```
 
-#### 4. **编译器设置**
-
-为了避免编译时的编码问题，特别是在 Windows 下使用 MSVC 编译器时，可以通过以下方式设置 UTF-8 编码并解决常见的警告：
+当使用 CMake 构建项目后，会在 build 中生成一个 TutorialConfig.h 文件，内容如下：
 
 ```cmake
-if(MSVC)
-    # 设置UTF-8编码并消除C4819警告
-    add_compile_options("/utf-8" "/W3" "/Zc:__cplusplus" "/EHsc")
-endif()
+// 当前版本信息
+#define Tutorial_VERSION_MAJOR 1
+#define Tutorial_VERSION_MINOR 0
+#define Tutorial_VERSION_PATCH 2
 ```
 
-#### 5. **生成可执行文件**
+### tutorial.cpp 包含头文件 TutorialConfig.h，最后通过以下代码打印出可执行文件的名称和版本号。
 
-通过 `add_executable()` 命令生成可执行文件。它的基本格式如下：
+```cpp
+    if (argc < 2) {
+      // report version
+      std::cout << argv[0] << " Version " << Tutorial_VERSION_MAJOR << "."
+                << Tutorial_VERSION_MINOR << std::endl;
+      std::cout << "Usage: " << argv[0] << " number" << std::endl;
+      return 1;
+    }
+```
+
+## 添加编译时间戳
+
+### 需要知道编译时的时间戳，并在程序运行时打印出来。
+
+那就需要在 CMakeLists.txt 中添加如下这句：
 
 ```cmake
-add_executable(<name> [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL] [source1] [source2 ...])
+string(TIMESTAMP COMPILE_TIME %Y%m%d-%H%M%S)
 ```
 
-- **`name`**: 可执行文件的名称，必须全局唯一。
-- **`WIN32`**: 用于 Windows 平台，创建 GUI 应用程序而非控制台应用程序。
-- **`MACOSX_BUNDLE`**: 用于 macOS 系统，创建一个 GUI 应用程序的 bundle。
-- **`EXCLUDE_FROM_ALL`**: 如果指定，可执行文件不会被默认构建。
+这表示将时间戳已指定格式保存到 COMPILE\_TIME 变量中。
 
-示例：
+### 修改上面的 **TutorialConfig.h.in**文件：
 
-```cmake
-add_executable(MyApp main.cpp app.cpp)
+```text
+// the configured options and settings for Tutorial
+#define Tutorial_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define Tutorial_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define Tutorial_VERSION_PATCH @PROJECT_VERSION_PATCH@
+
+#define TIMESTAMP @COMPILE_TIME@
 ```
 
-此外，还可以导入外部可执行文件或者为可执行文件创建别名：
+在构建项目后，TutorialConfig.h 文件就会自动增加一句：
 
-```cmake
-add_executable(MyApp IMPORTED)  # 导入外部可执行文件
-add_executable(MyAlias ALIAS MyApp)  # 为可执行文件创建别名
+```text
+#define TIMESTAMP 20230220-203532
 ```
 
-#### 6. **完整示例**
+这样就可以在源码中打印出 TIMESTAMP 的值了
 
-下面是一个完整的 CMake 项目设置示例，展示了如何定义项目、指定 C++ 标准、处理编码问题以及生成可执行文件：
+
+
+## [CMakeProject1项目](CMakeProject-1/README.md)
+
+### **完整示例**
+
+CMake 项目设置示例，展示了如何定义项目、指定 C++ 标准、处理编码问题以及生成可执行文件：
 
 ```cmake
 # CMake 最低版本
@@ -136,6 +147,31 @@ endif()
 
 # 生成可执行文件
 add_executable(MyApp main.cpp app.cpp)
+```
+
+## [CMakeProject2项目](CMakeProject-2/README.md)
+
+### **完整示例**
+
+#### search
+
+```cmake
+
+
+```
+
+#### sort
+
+```
+
+
+```
+
+#### main
+
+```
+
+
 ```
 
 ### CMake 创建库
